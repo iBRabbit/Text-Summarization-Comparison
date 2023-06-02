@@ -3,12 +3,15 @@ import string
 import numpy as np
 import networkx as nx
 
+from helpers import file_helpers as fh
+
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from scipy import spatial as sp
 
 class PageRank:
     stop_words = stopwords.words('english')
+    model_name = 'PageRank'
     sentences = []
     
     def clean_sentence(self, sentence):
@@ -73,22 +76,12 @@ class PageRank:
                 summary += ' ' + sent
         return summary
     
-    def summarize(self, text) :
+    def summarize(self, title, text) :
         sentence_tokens = self.get_sentence_tokens(text)
         sentence_embeddings = self.get_sentence_embeddings(sentence_tokens)
         similarity_matrix = self.get_similarity_matrix(sentence_tokens, sentence_embeddings)
         scores = self.get_score(similarity_matrix)
         top_sentence = self.get_top_sentence(scores)
         summary = self.generate_summary(top_sentence)
-        print(summary)
 
-def main() :
-    
-    text='''Santiago is a Shepherd who has a recurring dream which is supposedly prophetic. Inspired on learning this, he undertakes a journey to Egypt to discover the meaning of life and fulfill his destiny. During the course of his travels, he learns of his true purpose and meets many characters, including an “Alchemist”, that teach him valuable lessons about achieving his dreams. Santiago sets his sights on obtaining a certain kind of “treasure” for which he travels to Egypt. The key message is, “when you want something, all the universe conspires in helping you to achieve it.” Towards the final arc, Santiago gets robbed by bandits who end up revealing that the “treasure” he was looking for is buried in the place where his journey began. The end.'''
-    
-    pr = PageRank()
-    pr.summarize(text)
-    
-if __name__ == '__main__':
-    main()
-    
+        fh.save_file(title, summary, self.model_name)
