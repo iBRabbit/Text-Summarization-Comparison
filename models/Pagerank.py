@@ -3,7 +3,7 @@ import string
 import numpy as np
 import networkx as nx
 
-from helpers import file_helpers as fh
+from helpers.Files import Files
 
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
@@ -84,5 +84,5 @@ class PageRank:
         top_sentence = self.get_top_sentence(scores)
         summary = self.generate_summary(top_sentence)
 
-        fh.save_file(title, summary, self.model_name)
+        Files().save_file(title, summary, self.model_name)
         return summary

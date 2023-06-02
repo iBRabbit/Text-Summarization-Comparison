@@ -1,19 +1,16 @@
-# import models
-
 import os
 
 from models.Frequency import Frequency
 from models.Pagerank import PageRank
 
-from tests.Evaluation import Evaluation
-
-from helpers.file_helpers import is_output_dir_exists
+from helpers.Evaluation import Evaluation
+from helpers.Files import Files
 
 def get_summaries(file_name, text) :
     freq = Frequency()
     pr = PageRank()
     
-    if is_output_dir_exists(file_name) : 
+    if Files().is_output_dir_exists(file_name) : 
         print(f"Summaries already generated. Summaries loaded from output directory (output/{file_name})")
         freq_summary = open(f"output/{file_name}/Frequency.txt", 'r').read()
         pr_summary = open(f"output/{file_name}/PageRank.txt", 'r').read()
@@ -45,8 +42,7 @@ def main() :
         'PageRank': pr_summary
     }
     
-    evaluation = Evaluation()
-    evaluation.evaluate(models, text)
+    Evaluation().evaluate(models, text)
     
     pass
 

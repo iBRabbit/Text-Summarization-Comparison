@@ -2,7 +2,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem import PorterStemmer
 
-from helpers import file_helpers as fh
+from helpers.Files import Files
 
 import math
 import string
@@ -52,8 +52,8 @@ class Frequency:
         How many sentences does a word occur in?
         '''
         sent_per_words = {}
-        for sent, freq_table in freq_matrix.items() :
-            for word, count in freq_table.items() :
+        for _, freq_table in freq_matrix.items() :
+            for word, _ in freq_table.items() :
                 if word in sent_per_words :
                     sent_per_words[word] += 1
                 else :
@@ -127,6 +127,6 @@ class Frequency:
         average_score = self.get_average_score(sentence_value)
         summary = self.generate_summary(sentences, sentence_value, 1.2 * average_score)
         
-        fh.save_file(title, summary, self.model_name)
+        Files().save_file(title, summary, self.model_name)
         return summary
 
