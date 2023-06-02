@@ -4,7 +4,7 @@ from nltk.stem import PorterStemmer
 import math
 import string
 
-class Frequency (object) :
+class Frequency:
     stop_words = stopwords.words('english') + [p for p in string.punctuation]
     
     def generate_freq_matrix(self, sentences) : 

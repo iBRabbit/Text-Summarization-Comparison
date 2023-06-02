@@ -1,6 +1,7 @@
 import gensim as gs
 import string
 import numpy as np
+import networkx as nx
 
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
@@ -8,6 +9,7 @@ from scipy import spatial as sp
 
 class PageRank:
     stop_words = stopwords.words('english')
+    sentences = []
     
     def clean_sentence(self, sentence):
         cleaned_sentence = [word for word in sentence if word not in self.stop_words]
@@ -16,9 +18,9 @@ class PageRank:
         return cleaned_sentence
     
     def get_sentence_tokens(self, text):
-        sentences = sent_tokenize(text)
+        self.sentences = sent_tokenize(text)
         sentence_tokens = []
-        for sentence in sentences:
+        for sentence in self.sentences:
             sentence_tokens.append(word_tokenize(sentence))
         
         for i in range(len(sentence_tokens)):
@@ -52,16 +54,33 @@ class PageRank:
                 simliarity_matrix[i, j] = 1 - sp.distance.cosine(re, ce)
         
         return simliarity_matrix
+    
+    def get_score(self, similarity_matrix):
+        nx_graph = nx.from_numpy_array(similarity_matrix)
+        scores = nx.pagerank(nx_graph)
+        return scores
+    
+    def get_top_sentence(self, scores):
+        top_sentence = {sentence:scores[index] for index,sentence in enumerate(self.sentences)}
+        top_sentence = dict(sorted(top_sentence.items(), key=lambda x: x[1], reverse=True)[:4])
+        return top_sentence
+        
+    def generate_summary(self, top_sentences):
+        summary = ''
+        
+        for sent in self.sentences:
+            if sent in top_sentences.keys():
+                summary += ' ' + sent
+        return summary
+    
     def summarize(self, text) :
-
         sentence_tokens = self.get_sentence_tokens(text)
         sentence_embeddings = self.get_sentence_embeddings(sentence_tokens)
         similarity_matrix = self.get_similarity_matrix(sentence_tokens, sentence_embeddings)
-        print(similarity_matrix)
-        
-        
-        
-    pass
+        scores = self.get_score(similarity_matrix)
+        top_sentence = self.get_top_sentence(scores)
+        summary = self.generate_summary(top_sentence)
+        print(summary)
 
 def main() :
     
@@ -70,7 +89,6 @@ def main() :
     pr = PageRank()
     pr.summarize(text)
     
-    pass
 if __name__ == '__main__':
     main()
     
