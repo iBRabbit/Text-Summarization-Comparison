@@ -85,3 +85,4 @@ class PageRank:
         summary = self.generate_summary(top_sentence)
 
         fh.save_file(title, summary, self.model_name)
+        return summary

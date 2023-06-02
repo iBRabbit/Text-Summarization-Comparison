@@ -128,4 +128,5 @@ class Frequency:
         summary = self.generate_summary(sentences, sentence_value, 1.2 * average_score)
         
         fh.save_file(title, summary, self.model_name)
+        return summary
 
