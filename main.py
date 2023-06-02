@@ -1,3 +1,4 @@
+import streamlit as st
 import os
 
 from models.Frequency import Frequency
@@ -5,6 +6,8 @@ from models.Pagerank import PageRank
 
 from helpers.Evaluation import Evaluation
 from helpers.Files import Files
+
+from io import StringIO
 
 def get_summaries(file_name, text) :
     freq = Frequency()
@@ -23,18 +26,36 @@ def get_summaries(file_name, text) :
         
     return freq_summary, pr_summary
 
+def is_file_valid(uploaded_file) :
+    if uploaded_file is None :
+        print("File not found. Please upload a file")
+        st.write("File not found. Please upload a file")
+        return False
+
+    if uploaded_file.name.split('.')[-1] != 'txt' :
+        print(uploaded_file)
+        print("Please upload a TXT file")
+        st.write("Please upload a TXT file")
+        return False
+    
+    return True
 
 def main() :
     
-    # In : file_name
-    file_name = input("Enter file name : ")
+    st.title("Text Summarization")
+    st.subheader("Upload File to Summarize")
     
-    try:
-        text = open(os.path.join(os.path.dirname(__file__), f"dataset/{file_name}.txt"), 'r').read()
-    except :
-        print("File not found")
-        return
-
+    uploaded_file = st.file_uploader('Upload a TXT File')
+    
+    if not is_file_valid(uploaded_file):
+        return  
+    
+    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+    file_name = uploaded_file.name.split('.')[0]
+    text = stringio.read()
+    
+    st.write("File Uploaded Successfully")
+    
     freq_summary, pr_summary = get_summaries(file_name, text)
     
     models = {
@@ -42,10 +63,10 @@ def main() :
         'PageRank': pr_summary
     }
     
-    Evaluation().evaluate(models, text)
+    Evaluation().evaluate(models, text)    
     
-    pass
-
+    st.download_button(label="Download Frequency Summary", data=freq_summary, file_name=f"{file_name}_Frequency.txt")
+    st.download_button(label="Download PageRank Summary", data=pr_summary, file_name=f"{file_name}_PageRank.txt")
+    
 if __name__ == '__main__':
     main()
-    
