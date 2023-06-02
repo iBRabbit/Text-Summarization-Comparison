@@ -40,33 +40,65 @@ def is_file_valid(uploaded_file) :
     
     return True
 
+
 def main() :
     
     st.title("Text Summarization")
-    st.subheader("Upload File to Summarize")
+    st.subheader("Select an option to summarize text")
+    selector = st.selectbox("Select your choice", ["Select", "Upload a file", "Enter text"])
     
-    uploaded_file = st.file_uploader('Upload a TXT File')
+    if selector == "Select" :
+        return
     
-    if not is_file_valid(uploaded_file):
-        return  
+    if selector == "Upload a file" :
+        st.subheader("Upload File to Summarize")
+        
+        uploaded_file = st.file_uploader('Upload a TXT File')
+        
+        if not is_file_valid(uploaded_file):
+            return  
+        
+        stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+        file_name = uploaded_file.name.split('.')[0]
+        text = stringio.read()
+        
+        st.write("File Uploaded Successfully")
+        
+        freq_summary, pr_summary = get_summaries(file_name, text)
+        
+        models = {
+            'Frequency': freq_summary,
+            'PageRank': pr_summary
+        }
+        
+        Evaluation().evaluate(models, text)    
+        
+        st.download_button(label="Download Frequency Summary", data=freq_summary, file_name=f"{file_name}_Frequency.txt")
+        st.download_button(label="Download PageRank Summary", data=pr_summary, file_name=f"{file_name}_PageRank.txt")
+        return 
     
-    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-    file_name = uploaded_file.name.split('.')[0]
-    text = stringio.read()
-    
-    st.write("File Uploaded Successfully")
-    
-    freq_summary, pr_summary = get_summaries(file_name, text)
-    
-    models = {
-        'Frequency': freq_summary,
-        'PageRank': pr_summary
-    }
-    
-    Evaluation().evaluate(models, text)    
-    
-    st.download_button(label="Download Frequency Summary", data=freq_summary, file_name=f"{file_name}_Frequency.txt")
-    st.download_button(label="Download PageRank Summary", data=pr_summary, file_name=f"{file_name}_PageRank.txt")
-    
+    if selector == "Enter text" :
+        
+        st.subheader("Enter Text to Summarize")
+        file_name = st.text_input("Enter File Name")
+        
+        text = st.text_area("Enter Text Here")
+        
+        if text == "" or file_name == "" :
+            return
+        
+        freq_summary, pr_summary = get_summaries(file_name, text)
+        
+        models = {
+            'Frequency': freq_summary,
+            'PageRank': pr_summary
+        }
+        
+        Evaluation().evaluate(models, text)    
+        
+        st.download_button(label="Download Frequency Summary", data=freq_summary, file_name=f"{file_name}_Frequency.txt")
+        st.download_button(label="Download PageRank Summary", data=pr_summary, file_name=f"{file_name}_PageRank.txt")
+        return
+        
 if __name__ == '__main__':
     main()
