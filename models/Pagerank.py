@@ -4,6 +4,7 @@ import numpy as np
 
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
+from scipy import spatial as sp
 
 class PageRank:
     stop_words = stopwords.words('english')
@@ -40,16 +41,23 @@ class PageRank:
         
         max_length = max([len(tokens) for tokens in sentence_tokens])
         
-        sentence_embeddings = [np.pad(emb, (0, max_length - len(emb)), 'constant') for emb in model] # pad embeddings to make them of equal length
+        sentence_embeddings = [np.pad(emb, (0, max_length - len(emb)), 'constant') for emb in sentence_embeddings] # pad embeddings to make them of equal length
         return sentence_embeddings
     
+    def get_similarity_matrix(self, sentence_tokens, sentence_embeddings):
+        simliarity_matrix = np.zeros([len(sentence_tokens), len(sentence_tokens)])
+        
+        for i, re in enumerate(sentence_embeddings) :
+            for j, ce in enumerate(sentence_embeddings) :
+                simliarity_matrix[i, j] = 1 - sp.distance.cosine(re, ce)
+        
+        return simliarity_matrix
     def summarize(self, text) :
 
         sentence_tokens = self.get_sentence_tokens(text)
         sentence_embeddings = self.get_sentence_embeddings(sentence_tokens)
-        print(sentence_embeddings)
-        
-        # create similarity matrix
+        similarity_matrix = self.get_similarity_matrix(sentence_tokens, sentence_embeddings)
+        print(similarity_matrix)
         
         
         
