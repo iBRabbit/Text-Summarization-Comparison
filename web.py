@@ -1,8 +1,8 @@
 import streamlit as st
-import os
 
 from models.Frequency import Frequency
 from models.Pagerank import PageRank
+from models.LanguageDetection import LanguageDetection
 
 from helpers.Evaluation import Evaluation
 from helpers.Files import Files
@@ -40,6 +40,9 @@ def is_file_valid(uploaded_file) :
     
     return True
 
+def get_language(text) :
+    lang = LanguageDetection().predict(text)
+    return lang
 
 def main() :
     
@@ -64,19 +67,6 @@ def main() :
         
         st.write("File Uploaded Successfully")
         
-        freq_summary, pr_summary = get_summaries(file_name, text)
-        
-        models = {
-            'Frequency': freq_summary,
-            'PageRank': pr_summary
-        }
-        
-        Evaluation().evaluate(models, text)    
-        
-        st.download_button(label="Download Frequency Summary", data=freq_summary, file_name=f"{file_name}_Frequency.txt")
-        st.download_button(label="Download PageRank Summary", data=pr_summary, file_name=f"{file_name}_PageRank.txt")
-        return 
-    
     if selector == "Enter text" :
         
         st.subheader("Enter Text to Summarize")
@@ -84,21 +74,47 @@ def main() :
         
         text = st.text_area("Enter Text Here")
         
-        if text == "" or file_name == "" :
-            return
-        
-        freq_summary, pr_summary = get_summaries(file_name, text)
-        
-        models = {
-            'Frequency': freq_summary,
-            'PageRank': pr_summary
-        }
-        
-        Evaluation().evaluate(models, text)    
-        
-        st.download_button(label="Download Frequency Summary", data=freq_summary, file_name=f"{file_name}_Frequency.txt")
-        st.download_button(label="Download PageRank Summary", data=pr_summary, file_name=f"{file_name}_PageRank.txt")
+    if text == "" or file_name == "" :
         return
-        
+
+    if get_language(text) != 'English' :
+        print("Language not supported. Please enter text in English")
+        st.write("Language is probably not supported. The model is best suited for English. Please enter text in English")
+        st.write("Language detected: " + get_language(text))
+        return
+    
+    if len(text) < 100 :
+        print("Text too short. Please enter text with more than 100 characters")
+        st.write("Text too short. Please enter text with more than 100 characters")
+        return
+    
+    freq_summary, pr_summary = get_summaries(file_name, text)
+    
+    models = {
+        'Frequency': freq_summary,
+        'PageRank': pr_summary
+    }
+    
+    uploaded_file.close()
+    
+    st.subheader("Frequency Summary")
+    st.write(freq_summary)
+    
+    st.download_button(label="Download Frequency Summary", data=freq_summary, file_name=f"{file_name}_Frequency.txt")
+    
+    st.subheader("PageRank Summary")
+    st.write(pr_summary)
+
+    st.download_button(label="Download PageRank Summary", data=pr_summary, file_name=f"{file_name}_PageRank.txt")
+    
+    st.subheader("Evaluation")
+    Evaluation().evaluate(models, text)    
+    
+    st.subheader("Credits")
+    st.write("This project is made by:")
+    st.write("1. Felix Prima - 2301899622")
+    st.write("2. Bryan Felix - 2301925532")
+    st.write("3. Irvin - 2301854555")
+    
 if __name__ == '__main__':
     main()
