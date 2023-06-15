@@ -1,7 +1,7 @@
 import streamlit as st
 
 from models.Frequency import Frequency
-from models.Pagerank import PageRank
+from models.TextRank import TextRank
 from models.LanguageDetection import LanguageDetection
 
 from helpers.Evaluation import Evaluation
@@ -11,20 +11,14 @@ from io import StringIO
 
 def get_summaries(file_name, text) :
     freq = Frequency()
-    pr = PageRank()
+    tr = TextRank()
     
-    if Files().is_output_dir_exists(file_name) : 
-        print(f"Summaries already generated. Summaries loaded from output directory (output/{file_name})")
-        freq_summary = open(f"output/{file_name}/Frequency.txt", 'r').read()
-        pr_summary = open(f"output/{file_name}/PageRank.txt", 'r').read()
+    print("Generating summaries...")
+    freq_summary = freq.summarize(file_name, text)
+    tr_summary = tr.summarize(file_name, text)
+    print(f"Summaries generated. Summaries saved in output directory (output/{file_name}))")
         
-    else :
-        print("Generating summaries...")
-        freq_summary = freq.summarize(file_name, text)
-        pr_summary = pr.summarize(file_name, text)
-        print(f"Summaries generated. Summaries saved in output directory (output/{file_name}))")
-        
-    return freq_summary, pr_summary
+    return freq_summary, tr_summary
 
 def is_file_valid(uploaded_file) :
     if uploaded_file is None :
@@ -67,6 +61,7 @@ def main() :
         
         st.write("File Uploaded Successfully")
         
+        uploaded_file.close()
     if selector == "Enter text" :
         
         st.subheader("Enter Text to Summarize")
@@ -88,26 +83,24 @@ def main() :
         st.write("Text too short. Please enter text with more than 100 characters")
         return
     
-    freq_summary, pr_summary = get_summaries(file_name, text)
+    freq_summary, tr_summary = get_summaries(file_name, text)
     
     models = {
         'Frequency': freq_summary,
-        'PageRank': pr_summary
+        'TextRank': tr_summary
     }
-    
-    uploaded_file.close()
     
     st.subheader("Frequency Summary")
     st.write(freq_summary)
     
     st.download_button(label="Download Frequency Summary", data=freq_summary, file_name=f"{file_name}_Frequency.txt")
     
-    st.subheader("PageRank Summary")
-    st.write(pr_summary)
+    st.subheader("TextRank Summary")
+    st.write(tr_summary)
 
-    st.download_button(label="Download PageRank Summary", data=pr_summary, file_name=f"{file_name}_PageRank.txt")
+    st.download_button(label="Download TextRank Summary", data=tr_summary, file_name=f"{file_name}_TextRank.txt")
     
-    st.subheader("Evaluation")
+    st.subheader("Evaluation based on original text")
     Evaluation().evaluate(models, text)    
     
     st.subheader("Credits")

@@ -9,9 +9,9 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from scipy import spatial as sp
 
-class PageRank:
+class TextRank:
     stop_words = stopwords.words('english')
-    model_name = 'PageRank'
+    model_name = 'TextRank'
     sentences = []
     
     def clean_sentence(self, sentence):
